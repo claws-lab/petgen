@@ -3,134 +3,36 @@ from time import strftime, localtime
 import os
 import re
 import torch
-# ==== bing's deployment ====
+
 occupied_gpu_ram_memory = 32510 - 1*1024
 if_gpu_while_loop_monitor = True # get the requried ram to run the code:
 if_use_cpu = False
 
-# malcom-direction: GOSSIP
-dataset = "wiki" # wiki, yelp, yelpEqu, yelpEquLarge :  UN: twitter, unbalanced, TwitterUN, wikiUN, yelpUN, GOSSIP
-if_unbalance = False # False
-if if_unbalance:
-    weights = [1, 5] # 10, 1000, here, note that 10:1 is wrong!
-
 #
-server = "dgx1"
+dataset = "wiki" # wiki, yelp
+if_unbalance = False # False # if data is imbalanceed, we can set the class weight
+if if_unbalance:
+    weights = [1, 5]
+
 if dataset == "wiki":
-    pretrained_rnn_clf = r"pretrain/wiki/clf_pretrain_relganRevised_sl31.pt"
-    pretrained_rnn_clf_another = r"save/20210124/wiki/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl31_temp1_lfd0.0_T0124_2236_57_module01000/models/CLF_model100_epoch1610.pt"
-    pretrained_ties_clf = "save/20210114/wiki/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl31_temp1_lfd0.0_T0114_2231_38_module00000/models/CLF_model010_epoch680.pt"
     max_seq_len = 30
+    pretrained_gen_paths = {
+    }
+else:
+    max_seq_len = 30
+    pretrained_gen_paths = {
+    }
 
-    pretrained_gen_paths = {
-        "pure_mle": "save/20210105/wiki/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl31_temp1_lfd0.0_T0105_2341_24_module0000/models/MLE_model0000_epoch220.pt",
-        "stance_aware": "save/20210119/wiki/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl31_temp1_lfd0.0_T0119_1129_43_module00000/models/MLE_model00000_epoch460.pt",
-        "pure_ours_all_rnn": r"save/20210107/wiki/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl31_temp1_lfd0.0_T0107_2246_17_module1111/models/ADV_model1111_epoch0.pt",
-        "stance_aware_ours_all_ties": r"save/20210121/wiki/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl31_temp1_lfd0.0_T0121_2202_10_module11110/models/ADV_model11110_epoch276.pt",
-    }
-elif dataset == "wikiUN":
-    max_seq_len = 30
-    pretrained_gen_paths = {
-        "pure_mle": "",
-        "stance_aware": "",
-        "pure_ours_all_rnn": r"",
-        "stance_aware_ours_all_ties": r"",
-    }
-elif dataset == "yelpUN":
-    max_seq_len = 30
-    pretrained_gen_paths = {
-        "pure_mle": "",
-        "stance_aware": "",
-        "pure_ours_all_rnn": "",
-        "stance_aware_ours_all_ties": "",
-        "malcom": "",
-        "ours": "",
-    }
-elif dataset == "yelpEqu":
-    max_seq_len = 30
-    pretrained_rnn_clf = ""
-    pretrained_gen_paths = {
-        "pure_mle": "",
-        "stance_aware": "",
-        "pure_ours_all_rnn": r"",
-        "stance_aware_ours_all_ties": r"",
-        "malcom": r"",
-        "ours": r"",
-    }
-elif dataset == "yelp":
-    max_seq_len = 30
-
-    pretrained_rnn_clf_another = "save/20210129/yelp/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl101_temp1_lfd0.0_T0129_1634_20_module0000/models/CLF_model100_epoch50.pt"
-    pretrained_ties_clf = "save/20210128/yelp/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl101_temp1_lfd0.0_T0128_2334_39_module00000/models/CLF_model010_epoch160.pt"
-
-    if server == "dgx1":
-        pretrained_rnn_clf = "save/20210128/yelp/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl101_temp1_lfd0.0_T0128_2320_00_module00000/models/CLF_model100_epoch480.pt"
-        pretrained_gen_paths = {
-            "pure_mle": "save/20210129/yelp/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl101_temp1_lfd0.0_T0129_1228_03_module0000/models/MLE_model0000_epoch75.pt",
-            "stance_aware": "save/20210129/yelp/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl101_temp1_lfd0.0_T0129_0013_36_module00000/models/MLE_model00000_epoch310.pt",
-            "pure_ours_all_rnn": "",
-            "stance_aware_ours_all_ties": "",
-        }
-    else:
-        assert server == "data5"
-        pretrained_rnn_clf = "save/20210129/yelp/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl105_temp1_lfd0.0_T0129_1814_25_module0000/models/CLF_model100_epoch890.pt"
-        pretrained_gen_paths = {
-            "pure_mle": "save/20210130/yelp/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl105_temp1_lfd0.0_T0130_2107_09_module0000/models/MLE_model0000_epoch255.pt",
-            "stance_aware": "save/20210130/wiki/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl32_temp1_lfd0.0_T0130_0504_57_module0000/models/MLE_model0000_epoch575.pt",
-            "pure_ours_all_rnn": "",
-            "stance_aware_ours_all_ties": "",
-        }
-elif dataset == "twitter":
-    max_seq_len = 30
-    pretrained_gen_paths = {
-                "pure_mle": "",
-                "stance_aware": "",
-                "pure_ours_all_rnn": "",
-                "stance_aware_ours_all_ties": "",
-    }
-elif dataset == "yelpEquLarge":
-    max_seq_len = 30
-    pretrained_rnn_clf = r"save/20210218/yelpEquLarge/RelGANInstructorRevisedAttack_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl31_temp1_lfd0.0_T0218_1702_53_module0000/models/CLF_model100_epoch40.pt" # for item
-        # r"/home/bhe46/program/aml/TextGAN-PyTorch/save/20210205/yelpEquLarge/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl31_temp1_lfd0.0_T0205_1201_01_module0000/models/CLF_model100_epoch430.pt" -- finally used in petgen
-        # rf"{header}save/20210205/yelpEquLarge/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl31_temp1_lfd0.0_T0205_1201_01_module0000/model/CLF_model100_epoch430.pt"
-        # r"/home/bhe46/program/aml/TextGAN-PyTorch/save/20210205/yelpEquLarge/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl31_temp1_lfd0.0_T0205_1201_01_module0000/models/CLF_model100_epoch430.pt"
-        # r"save/20210205/yelpEquLarge/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl31_temp1_lfd0.0_T0205_1201_01_module0000/model/CLF_model100_epoch430.pt"
-    pretrained_rnn_clf_another = r"save/20210205/yelpEquLarge/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl31_temp1_lfd0.0_T0205_1437_36_module0000/models/CLF_model100_epoch310.pt"
-    pretrained_ties_clf = r"save/20210205/yelpEquLarge/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl31_temp1_lfd0.0_T0205_1435_37_module0000/models/CLF_model010_epoch100.pt"
-
-    pretrained_gen_paths = {
-                "pure_mle": "",
-                "stance_aware": "",
-                "pure_ours_all_rnn": "",
-                "stance_aware_ours_all_ties": "",
-                "malcom": "save/20210205/yelpEquLarge/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl31_temp1_lfd0.0_T0205_1210_24_module0000/models/MLE_model0000_epoch335.pt",
-                "ours": "",
-    }
-elif dataset == "GOSSIP":
-    max_seq_len = 30
-    # pretrained_rnn_clf = "/home/bhe46/program/aml/TextGAN-PyTorch/save/20210319/GOSSIP/MALCOM_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl103_temp1_lfd0.0_T0319_1040_47_module0000/models/CLF_model100_epoch399.pt"
-    pretrained_rnn_clf = "save/20210320/GOSSIP/MALCOM_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl103_temp1_lfd0.0_T0320_0939_58_module0000/models/CLF_model100_epoch110.pt"
-    pretrained_rnn_clf_another = ""
-    pretrained_ties_clf = ""
-    pretrained_gen_paths = {
-                "pure_mle": "",
-                "stance_aware": "",
-                "pure_ours_all_rnn": "",
-                "stance_aware_ours_all_ties": "",
-                # "malcom": "save/20210319/GOSSIP/MALCOM_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl103_temp1_lfd0.0_T0319_1100_39_module0000/models/MLE_model0000_epoch90.pt",
-                # "malcom": "save/20210319/GOSSIP/MALCOM_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl103_temp1_lfd0.0_T0319_2040_11_module0000/models/MLE_model0000_epoch190.pt",
-                "malcom": "save/20210319/GOSSIP/MALCOM_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl103_temp1_lfd0.0_T0319_2040_11_module0000/models/MLE_model0000_epoch499.pt",
-                "ours": "",
-    }
-# ==== never change ====
-if_context = True # whether we include the contexts: for the vocab and model building! even for the classifier, we need it!
-if_linear_embedding = True # True all the time and we do not change it
-# ==== never change ====
+# ==== setting ====
+if_context = True # include the contxt for the LM training
+if_linear_embedding = True # True: linear embedding for GAN training like Text-GAN
+# ==== end ====
 
 # ==== clf part ==== #
-if_have_clf = True # it should be True all the time, False  True
+if_have_clf = True #
 use_saved_clf = False  # False True
-# "save/20210114/wiki/relganRevised_vanilla_dt-Ra_lt-rsgan_mt-ra_et-Ra_sl31_temp1_lfd0.0_T0114_1256_53_module00000/models/CLF_model010_epoch1390.pt"
+
+# ==== different classifiers ====
 if use_saved_clf is False:
     clf_by_rnn = True # True
     clf_by_ties = False # False
@@ -138,101 +40,71 @@ if use_saved_clf is False:
 
     if clf_by_cnn:
         if_naccl_clf = True
-        use_text_cnn_method = True # False means that we use the generic f-cnn for the classification
+        use_text_cnn_method = True
         print(f"if_naccl_clf:{if_naccl_clf}, use_text_cnn_method:{use_text_cnn_method}")
 
-    # 2 epoches for sanity check
-    clf_epoches = 100 # after 2000: 400 is fine # 50: good performance # it seems that after 100 in the current dimension setting, the performance drops, or 50 can be ok
-    clf_lr = 0.1 # for twitter 0.1 is better! previously, we normally use 0.01, for gossip, 0.1 is better for fast convergence.
+    clf_epoches = 200 #
+    clf_lr = 0.01 # lr for classifier only, data-sensitive
 else:
     clf_by_rnn = True
     clf_by_ties = False # True, False
     clf_by_cnn = False
 
     if clf_by_rnn:
-        pretrained_clf_path = pretrained_rnn_clf #  + 'clf_pretrain_{}_sl{}.pt'.format(run_model, max_seq_len)
+        pretrained_clf_path = None #
     if clf_by_ties:
-        pretrained_clf_path = pretrained_ties_clf
+        pretrained_clf_path = None #
 if if_unbalance:
     clf_model_name = f"{int(clf_by_rnn)}{int(clf_by_ties)}{int(clf_by_cnn)}weight{weights[1]}"
 else:
     clf_model_name = f"{int(clf_by_rnn)}{int(clf_by_ties)}{int(clf_by_cnn)}"
 if_sav_clf = False # True, False
 
-batch_size = 32 # in data5, real data, 64 is oom error, then 32, 16
+batch_size = 64 #
 # ==== pretrain MLE part ====:
-if_use_context_attention_aware = True # False True, only True, when stance-aware setting, it will change the hidden dimension, ablation study, it is false when malcom
-# check the run_relgan.py file for the details
-if_pretrain_mle = True # True: whether we pretrain the LM False:
-MLE_train_epoch = 100 # 200 # 150 # 5000, 2 for sanity check
+if_use_context_attention_aware = True
+if_pretrain_mle = True # True: whether we pretrain the LM, False:; by default, we need to pretrain the LM
+MLE_train_epoch = 200 #
 if if_pretrain_mle is True:
     if_previous_pretrain_model = False # True:the relgan solution: random initial state  False: text summarization technique
-    if_sav_pretrain = False
-if_use_saved_gen = False # sometimes, we just train clf as the base one and we do not need the gen and we choose two Falses
-# used when if cfg.gen_pretrain and cfg.if_use_gen:
-# ==== possible question ====:
+    if_sav_pretrain = False # whether save the LM or not
+if_use_saved_gen = False # if we pretrained the LM in the past, we can use saved gen.
+
+# ==== if you use the pretrained model, you can use the following setup. Otherwise, skip it ====
 # ======== for the existing pretrained model ========
-# stance_aware_ours_all_rnn: should be with rnn?? but, no stance
 if if_use_context_attention_aware:
-    # 1) when we build the best model, we use stance_aware model
-    pretrained_gen_path_used = pretrained_gen_paths["stance_aware"] # stance_aware  stance_aware_ours_all_ties
+    pretrained_gen_path_used = pretrained_gen_paths.get("stance_aware", None) # stance_aware  stance_aware_ours_all_ties
 else:
-    # 0) when we do the ablation study, we should use pure_mle
-    pretrained_gen_path_used = pretrained_gen_paths["pure_mle"] # without four tasks: pure_mle with 4 tasks: pure_ours_all_rnn
-# ==== more generic approach ====:
-model_selection = "malcom" # malcom, ours
-pretrained_gen_path_used = pretrained_gen_paths.get(model_selection, None)
+    pretrained_gen_path_used = pretrained_gen_paths.get("pure_mle", None) # without tasks:
 # ======== end ========
+# ==== end ====
+
+
 # ==== adv part ====
 # adv_training global setting
-if_pretrain_mle_in_adv = True # True, False
-ADV_train_epoch = 100 # 3000 # 3000 # 2 for sanity check
+if_pretrain_mle_in_adv = False # True, False
+ADV_train_epoch = 200 #
 if_adv_training = True # False True
 
+# ==== setting for the mode ====
 if if_adv_training is False:
-    if_adv_gan, if_adv_attack, if_adv_recency, if_adv_relevancy, if_adv_stance = False, False, False, False, False
+    if_adv_gan, if_adv_attack, if_adv_recency, if_adv_relevancy = False, False, False, False
 else:
     attack_lr = 1e-5 # value for the sanity check now
-    recency_lr = 1e-6 # -5 no changes at all
+    recency_lr = 1e-5 #
     num_recent_posts = 3 # 3, add it to 5
-    relevancy_lr = 1e-6
-    if_sav_adv = False
-    # adv_xx the submodule for the testing
-    # mode 0: True, False, False, False
-    # mode 1: False, True, False, False
-    # mode 2: False, False, True, False
-    # mode 3: False, False, False, True
-    # mode 4: True, True, True, True
-    # mode 5 (malcom): True, True, False, True
-    if_adv_gan, if_adv_attack, if_adv_recency, if_adv_relevancy, if_adv_stance = True, True, True, True, False
-# model_name = f"{int(cfg.if_adv_gan)}{int(cfg.if_adv_attack)}{int(cfg.if_adv_recency)}{int(cfg.if_adv_relevancy)}"
+    relevancy_lr = 1e-5
+    if_sav_adv = False # whether save the result or not
+    if_adv_gan, if_adv_attack, if_adv_recency, if_adv_relevancy = True, True, True, True
+# model name definition
 model_name = f"{int(if_adv_gan)}{int(if_adv_attack)}{int(if_adv_recency)}{int(if_adv_relevancy)}"
+# ==== end ====
 
-#######################################
-# #### when we in the testing mode ####
+# ==== end ====
 
-if_just_transfer_no_write = True # True: write text in txt for human evaluation; False:
 
-if_test_baseline = False # True False # text generator testing
-if_test_our_generator = True # text generator testing
-
-if_black_box_test_rnn = False
-if_black_box_test_ties = False
-if if_black_box_test_rnn or if_black_box_test_ties:
-    assert clf_by_rnn == True
-
-#######################################################
-# ==== standard solutions ====:
-compared_methods = {
-    0:"copycat",
-    1:"hotflip",
-    2:"uniAdBugger",
-    3:"textBugger",
-}
-
-# ==== end bing's setting ====
 # ==== RevisedRelGan ====
-max_len_seq_lstm = 20 # the number of edits(posts)
+max_len_seq_lstm = 30 # the number of edits(posts)
 
 # ===Program===
 if_save = False # if_save for pretrain genator
@@ -350,7 +222,7 @@ if os.path.exists(log_filename + '.txt'):
 log_filename = log_filename + '.txt'
 
 
-# by bing: another approach
+# by : another approach
 def pick_gpu_lowest_memory():
     """Returns GPU with the least allocated memory"""
 
@@ -407,18 +279,18 @@ def pick_gpu_lowest_memory():
     return best_gpu
 
 # Automatically choose GPU or CPU
-# bing bing
+#
 #  https://stackoverflow.com/questions/41634674/tensorflow-on-shared-gpus-how-to-automatically-select-the-one-that-is-unused
 if torch.cuda.is_available() and torch.cuda.device_count() > 0:
     device = pick_gpu_lowest_memory()
 else:
     device = -1
 
-# comment by bing
+# comment by
 # if torch.cuda.is_available() and torch.cuda.device_count() > 0:
 #     os.system('nvidia-smi -q -d Utilization > gpu')
 #     with open('gpu', 'r') as _tmpfile:
-#         # revised by bing, previously, we choose by utility, key word to Memory, not correct
+#         # revised by , previously, we choose by utility, key word to Memory, not correct
 #         util_gpu = list(map(int, re.findall(r'Gpu\s+:\s*(\d+)\s*%', _tmpfile.read())))
 #     os.remove('gpu')
 #     if len(util_gpu):
@@ -438,7 +310,7 @@ if multi_gpu:
     os.environ['CUDA_VISIBLE_DIVICES'] = ','.join(map(str, devices))
 else:
     devices = str(device)
-    # revised by bing for some checking
+    # revised by  for some checking
     if if_use_cpu:
         device = torch.device("cpu")
     else:
@@ -472,7 +344,7 @@ pretrained_dis_path = pretrain_root + 'dis_pretrain_{}_{}_sl{}_sn{}.pt'.format(r
                                                                                samples_num)
 pretrained_clas_path = pretrain_root + 'clas_pretrain_{}_{}_sl{}_sn{}.pt'.format(run_model, model_type, max_seq_len,
                                                                                  samples_num)
-# bing # change t
+#  # change t
 # pretrained_clf_path = pretrain_root + 'clf_pretrain_{}_sl{}.pt'.format(run_model, max_seq_len)
 # clf_pretrain_relganRevised_lstm_sl31_sn1000.pt -> clf_pretrain_relganRevised_sl31.pt
 
@@ -483,7 +355,7 @@ tips = ''
 if samples_num == 5000 or samples_num == 2000:
     assert 'c' in run_model, 'warning: samples_num={}, run_model={}'.format(samples_num, run_model)
 
-# TODO: we should be able to have advanced methods, like dict setting
+
 def param_update_extend_vocab(var):
     global extend_vocab_size
     extend_vocab_size = var
@@ -585,7 +457,7 @@ def init_param(opt):
     signal_file = opt.signal_file
     tips = opt.tips
 
-    # comment by bing: Jan. 9th, since it is repeated
+    # comment by : Jan. 9th, since it is repeated
     # # CUDA device
     # if multi_gpu:
     #     if type(devices) == str:
@@ -629,7 +501,6 @@ def init_param(opt):
                                                                                    samples_num)
     pretrained_clas_path = pretrain_root + 'clas_pretrain_{}_{}_sl{}_sn{}.pt'.format(run_model, model_type, max_seq_len,
                                                                                      samples_num)
-    # bing
     # pretrained_clf_path = pretrain_root + 'clf_pretrain_{}_sl{}.pt'.format(run_model, max_seq_len)
     # Assertion
     assert k_label >= 2, 'Error: k_label = {}, which should be >=2!'.format(k_label)

@@ -28,7 +28,6 @@ class Generic_Clf(nn.Module):
             pred_probs = []
             for i in range(batch_size):
                 seq = seqs_batch[i] # tensor: num_sents*max_sent_len
-                # TODO: note, this difference comes from the clf setting!
                 if cfg.if_linear_embedding and not if_malcom_special_condition:
                     # print(seq.shape)
                     seq = F.one_hot(seq, vocab_size).float() # seq_len*sent_len*vocab_size
@@ -54,7 +53,7 @@ class Generic_Clf(nn.Module):
         y_pred_probs = []
         y_tests = []
 
-        # TODO: check the model.eval in the later time and omit at first
+
         # model.eval()
         with torch.no_grad():
             # print(f"{len(seqs) - batch_size, batch_size}")
@@ -140,7 +139,7 @@ class TwoLevelLstmClassifier(Generic_Clf):
         # following cross entroy, we should have the batch number!
         return pred_label
 
-# ==== initial classifier for interface purpose ====
+# ==== the initial classifier for interface purpose ====
 class TIES_V2(TwoLevelLstmClassifier):
     def __init__(self, embedding_dim, seq_hidden_dim, seqs_hidden_dim, vocab_size, label_size,
                  max_len_seq_lstm, max_len_sent):

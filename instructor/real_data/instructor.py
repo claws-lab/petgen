@@ -40,7 +40,7 @@ class BasicInstructor:
         try:
             self.train_data = GenDataIter(cfg.train_data)
             # print("finish self.train_data")
-            # by bing, add the if_context for later update!
+            # by , add the if_context for later update!
             self.test_data = GenDataIter(cfg.test_data, if_test_data=True, if_context=cfg.if_context)
             # print("finish self.test_data")
         except RuntimeError:
@@ -88,7 +88,7 @@ class BasicInstructor:
             self.log.info(
                 'Load pre-trained discriminator: {}'.format(cfg.pretrained_dis_path))
             self.dis.load_state_dict(torch.load(cfg.pretrained_dis_path, map_location='cuda:{}'.format(cfg.device)))
-        # revised by bing
+        # revised by
         # if cfg.gen_pretrain: previous
         if cfg.if_use_saved_gen:
             # comment (not cfg.if_pretrain_mle) since sometimes, we want to cotinue training!
@@ -105,7 +105,7 @@ class BasicInstructor:
     @staticmethod
     def compute_hiddens(model, seqs, if_detach=True, if_list2tensor_quick_computation=False):
         if isinstance(seqs, list):
-            # bing: debug setting, we have to ensure there are more than one seq in seqs
+            # : debug setting, we have to ensure there are more than one seq in seqs
             if if_list2tensor_quick_computation and len(seqs) > 1:
                 # ==== condition 0 ====: from list input, where in the seq-context-one-long setting, we pad the different seq and train it
                 # previously, we set: 1+; but, after thinking, we should omit it and set our own plans: be careful of it and set it well! --- be careful!
@@ -182,18 +182,6 @@ class BasicInstructor:
                     num_batches += 1
                     one_data_batch = data_loader[index: index+cfg.batch_size]
 
-                    # note, once you get the flatten 1-dimensional tensor, be careful of view(1, -1) setting
-                    # prev
-                    # inp = torch.cat([one_dict['input'].view(1, -1) for one_dict in one_data_batch], dim=0)
-                    # present
-                    # inp = []
-                    # for one_dict in one_data_batch:
-                    #     if len(one_dict['input'].shape) == 1:
-                    #         inp.append(one_dict['input'].view(1, -1))
-                    #     else:
-                    #         print()
-                    #         inp.append(one_dict['input']) # torch.Size([248, 4322]) torch.Size([8, 1, 512]) # error
-                    # inp = torch.cat(inp, dim=0)
                     # present 2: more universal solution
                     if if_one_hot_in_one_batch_in_malcom_exp:
                         # F.one_hot(i, cfg.extend_vocab_size).float()
@@ -212,7 +200,7 @@ class BasicInstructor:
                     hidden = self.compute_hiddens(model, one_long_context, if_list2tensor_quick_computation=if_list2tensor_quick_computation) # batch_size*1*hidden
                     # ==== end ====
 
-                    # todo for bing, a little different from the step function?
+
                     # by checking, the forward comes from the basic relational_rnn_general generator setting!
                     # print(inp.shape, hidden.shape) # batch_size*seq_len*[vocab_sizeInLinearEmbedding]
                     pred = model.forward(inp, hidden)  # (seq_len*batch)*vocab_size
@@ -233,7 +221,7 @@ class BasicInstructor:
                     inp, target = inp.cuda(), target.cuda()
 
                 hidden = model.init_hidden(data_loader.batch_size) # batch_size*1*hidden_state
-                # todo for bing, a little different from the step function?
+
                 # by checking, the forward comes from the basic relational_rnn_general generator setting!
                 pred = model.forward(inp, hidden) # (seq_len*batch)*vocab_size
                 # print(inp.shape, hidden.shape, target.shape, pred.shape)
@@ -410,7 +398,7 @@ class BasicInstructor:
 
         with torch.no_grad():
             # Prepare data for evaluation
-            # added by bing: get it from random setting or the variable transfer!
+            # added by : get it from random setting or the variable transfer!
             if eval_samples == None:
                 eval_samples = self.gen.sample(cfg.samples_num, 4 * cfg.batch_size)
                 # not sure why 200, 200 in this case
@@ -465,7 +453,7 @@ class BasicInstructor:
     def _save(self, phase, epoch, dictionary=None, prev_hiddens=None):
         """Save model state dict and generator's samples"""
 
-        # TODO: why do we set no ADV? proposed by bing?
+
         if phase != 'ADV':
             torch.save(self.gen.state_dict(), cfg.save_model_root + 'gen_{}_{:05d}.pt'.format(phase, epoch))
 

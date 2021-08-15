@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Author       : William
-# @Project      : TextGAN-william
-# @FileName     : config.py
-# @Time         : Created at 2019-03-18
-# @Blog         : http://zhiweil.ml/
-# @Description  :
-# Copyrights (C) 2018. All Rights Reserved.
 from __future__ import print_function
 
 import argparse
@@ -118,31 +110,19 @@ if __name__ == '__main__':
     if opt.if_real_data:
         # check this issue for the details:
         # https://github.com/williamSYSU/TextGAN-PyTorch/issues/25
-        # bing, you encounter the similar problems at this part!
+
         opt.max_seq_len, opt.vocab_size = text_process('dataset/' + opt.dataset + '.txt')
         print("opt.max_seq_len (the length of one sentence/review/post): ", opt.max_seq_len)
-        # print(f"the opt.vocab_size is {opt.vocab_size, opt.max_seq_len}")
-        # in the logging, we can see the vocabulary: in wiki, the size is 83545
-        # max_seq_len: 1706, in the wiki data, but I change it to the 20
-        # opt.max_seq_len = 20 # when we have small data, i comment 20 length limit
-        # load_test_dict returns two things: return word2idx_dict, idx2word_dict
-        # update it when if_context in the testing data setting!
         cfg.extend_vocab_size = len(load_test_dict(opt.dataset)[0])  # init classifier vocab_size
 
         word2idx_dict, idx2word_dict = load_test_dict(opt.dataset)
-        # TODO: there are some errors in this if_context setting
+
         if cfg.if_context:
-            # print("start if_context")
             txt_path = 'dataset/testdata/{}_context.txt'.format(opt.dataset)
-            # print("start if_context")
-            # print(f"the size of the vocabulary before the context {len(word2idx_dict)}")
             from utils.text_process import update_dictionaries_by_txt_file
             word2idx_dict, _ = update_dictionaries_by_txt_file(txt_path,
                                            word2idx_dict, idx2word_dict, category=opt.dataset)
-            # print(f"the size of the vocabulary after the context {len(word2idx_dict)}")
             cfg.extend_vocab_size = len(word2idx_dict)
-
-        # print(f"the cfg.extend_vocab_size is {cfg.extend_vocab_size}")
     cfg.init_param(opt)
     opt.save_root = cfg.save_root
     opt.train_data = cfg.train_data
@@ -158,9 +138,9 @@ if __name__ == '__main__':
     # #### by bing
 
     # ===Dict===
+    # ======== PETGEN class ========
     if cfg.if_real_data:
         from instructor.real_data.relgan_revised_instructor import RelGANInstructorRevised
-
     else:
         pass
 

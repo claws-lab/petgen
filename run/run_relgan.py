@@ -17,7 +17,6 @@ else:
     gpu_id = 0
     print('Missing argument: job_id and gpu_id. Use default job_id: {}, gpu_id: {}'.format(job_id, gpu_id))
 
-# TODO: whether this is OK and check it later!
 import random, numpy, torch
 seed_val = 0 # the same as the random state in relgan_revised_instrutor
 random.seed(seed_val)
@@ -27,20 +26,13 @@ torch.cuda.manual_seed_all(seed_val)
 ##########################################################
 # training parameter: if_test, gen_pretrain, batch_size
 # ===Program===
-# TODO, why if_test, gen_pretrain, dis_pretrain
-# if_test used for saving some results
-# todo: check the if_test later
-if_test = int(False) # int(False)  int(True) # it should be false at first
-run_model = 'relganRevised' # 'relganRevised', 'MALCOM',  'relgan', RelGANInstructorRevisedAttack # --- never used "relganRevisedLstm"
-# use the generated pre_train: whether we use it or not
-# by default, in the original code, we should do the pretraining
-# False means that we do not the pretrained model and need to get it
+if_test = int(False) # int(False)  int(True) # train or test
+run_model = 'relganRevised' # call 'relganRevised' class
 # #### no use ####
 
-# max_seq_len = 30 # the length of the sentence??? TODO: check it
+# max_seq_len = 30 # the length of the sentence
 
-
-gen_lr = 1e-4 # previously, 1e-2, examined: 1e-3, 0, 1e-4,  1e-5
+gen_lr = 1e-4 #
 gen_adv_lr = 1e-4
 dis_lr = 1e-4
 # the log will not change so much, thus, we use the 10 steps rather than the 5 steps!
@@ -48,7 +40,7 @@ pre_log_step = 5
 adv_log_step = 3
 
 #####################################
-CUDA = int(True) # by bing, override in the main.py file
+CUDA = int(True)
 
 tips = 'PETGEN experiments'
 oracle_pretrain = int(True)
@@ -60,7 +52,6 @@ dis_pretrain = int(False)
 if_real_data = [int(True)]# [int(False), int(True)), int(True], previous, only False, then wrong,
 # dataset = ['yelp'] # 'yelp', 'wiki'
 loss_type = 'rsgan'
-#TODO: in the real data, the vocab is no use
 vocab_size =[0] # [5000, 0, 0] # in the wiki data, we still use 5k vocabulary
 temp_adpt = 'exp'
 temperature = [1, 100, 100]
@@ -112,7 +103,7 @@ args = [
 
     # Oracle or Real
     '--if_real_data', if_real_data[job_id],
-    # '--dataset', dataset[job_id], # bing: change it and set it in the config.py file
+    # '--dataset', dataset[job_id], # : change it and set it in the config.py file
     '--loss_type', loss_type,
     '--vocab_size', vocab_size[job_id],
     '--temp_adpt', temp_adpt,

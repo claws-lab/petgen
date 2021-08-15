@@ -62,7 +62,7 @@ class RelGANInstructor(BasicInstructor):
                     self.log.info('[ADV] epoch %d: g_loss: %.4f, d_loss: %.4f, %s' % (
                         adv_epoch, g_loss, d_loss, self.cal_metrics(fmt_str=True)))
                     # print("bing: show if_test".format(cfg.if_test))
-                    # bing: TODO: to change, and save text from the specific conditional text
+
                     if cfg.if_save and not cfg.if_test:
                         self._save('ADV', adv_epoch)
             else:
@@ -101,10 +101,10 @@ class RelGANInstructor(BasicInstructor):
         total_loss = 0
         # step: control the iteration times!
         for step in range(g_step):
-            # todo: what is the train_data with source and target setting
+
             # input: start+max-length-1; for target: all max-length
             real_samples = self.train_data.random_batch()['target']
-            # todo for bing: change the generation process and update the conditions
+
             gen_samples = self.gen.sample(cfg.batch_size, cfg.batch_size, one_hot=True)
             if cfg.CUDA:
                 real_samples, gen_samples = real_samples.cuda(), gen_samples.cuda()
@@ -124,9 +124,9 @@ class RelGANInstructor(BasicInstructor):
         total_loss = 0
         # step: control the iteration times!
         for step in range(d_step):
-            # todo: what is the train_data with source and target setting
+
             real_samples = self.train_data.random_batch()['target']
-            # todo for bing: change the generation process and update the conditions
+
             gen_samples = self.gen.sample(cfg.batch_size, cfg.batch_size, one_hot=True)
             if cfg.CUDA:
                 real_samples, gen_samples = real_samples.cuda(), gen_samples.cuda()
