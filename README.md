@@ -29,13 +29,13 @@ desirable properties.
 
 If you make use of this code, the PETGEN algorithm, or the datasets in your work, please cite the following paper:
 ```
- @inproceedings{he2021petgen,
-	title={PETGEN: Personalized Text Generation Attack on Deep Sequence Embedding-based Classification Models},
-	author={He, Bing and Ahamad, Mustaque and Kumar, Srijan},
-	booktitle={Proceedings of the 27th ACM SIGKDD international conference on Knowledge discovery and data mining},
-	year={2021},
-	organization={ACM}
- }
+@inproceedings{he2021petgen,
+  title={PETGEN: Personalized Text Generation Attack on Deep Sequence Embedding-based Classification Models},
+  author={He, Bing and Ahamad, Mustaque and Kumar, Srijan},
+  booktitle={Proceedings of the 27th ACM SIGKDD Conference on Knowledge Discovery \& Data Mining},
+  pages={575--584},
+  year={2021}
+}
 ```
 ### Data
 Data: the data is presented as follows: (Here, we take a sequence with 3 posts as an example)
