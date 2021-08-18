@@ -4,6 +4,8 @@
 
 #### [Link to the paper](https://www.cc.gatech.edu/~srijan/pubs/petgen-he-kdd2021.pdf)
 
+#### [Link to the slides/presentation](https://www.cc.gatech.edu/~srijan/docs/petgen_kdd21-final-release.pdf)
+
 ### Introduction
 What should a malicious user write next to fool a detection model?
 Identifying malicious users is critical to ensure the safety and integrity
