@@ -2,9 +2,10 @@
 
 #### Authors:  [Bing He](https://www.cc.gatech.edu/people/bing-he), [Mustaque Ahamad](https://www.cc.gatech.edu/~mustaq/), [Srijan Kumar](https://www.cc.gatech.edu/~srijan/)
 
-#### [Link to the paper](https://www.cc.gatech.edu/~srijan/pubs/petgen-he-kdd2021.pdf)
+#### [Link to the paper (pdf)](https://www.cc.gatech.edu/~srijan/pubs/petgen-he-kdd2021.pdf)
 
-#### [Link to the slides/presentation](https://www.cc.gatech.edu/~srijan/docs/petgen_kdd21-final-release.pdf)
+#### [Link to the slides/presentation (pdf)](https://www.cc.gatech.edu/~srijan/docs/petgen_kdd21-final-release.pdf)
+#### [Link to the slides/presentation (pptx)](https://www.cc.gatech.edu/~srijan/docs/petgen_kdd21-final-release.pptx)
 
 ### Introduction
 What should a malicious user write next to fool a detection model?
