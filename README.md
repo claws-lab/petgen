@@ -7,8 +7,11 @@
 #### [Link to the slides/presentation (pdf)](https://www.cc.gatech.edu/~srijan/docs/petgen_kdd21-final-release.pdf)
 #### [Link to the slides/presentation (pptx)](https://www.cc.gatech.edu/~srijan/docs/petgen_kdd21-final-release.pptx)
 
+### One-Line Description
+We conduct an adversarial attack on deep learning-based popularly-used malicious user detection models. 
+
 ### Introduction
-What should a malicious user write next to fool a detection model?
+_What should a malicious user write next to fool a detection model?_
 Identifying malicious users is critical to ensure the safety and integrity
 of internet platforms. Several deep learning based detection
 models have been created. However, malicious users can evade deep
